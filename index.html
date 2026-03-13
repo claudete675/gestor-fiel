@@ -12,12 +12,12 @@
 
   // ══ CONFIGURAÇÃO FIREBASE — substitua com seus dados do Console ══
   const firebaseConfig = {
-    apiKey:            "COLE_AQUI_apiKey",
-    authDomain:        "COLE_AQUI_authDomain",
-    projectId:         "COLE_AQUI_projectId",
-    storageBucket:     "COLE_AQUI_storageBucket",
-    messagingSenderId: "COLE_AQUI_messagingSenderId",
-    appId:             "COLE_AQUI_appId"
+    apiKey:            "AIzaSyCgEaQLuYgfTqq3h9j17l-ST-FZNHuYNok",
+    authDomain:        "gestor-fiel.firebaseapp.com",
+    projectId:         "gestor-fiel",
+    storageBucket:     "gestor-fiel.firebasestorage.app",
+    messagingSenderId: "291177720355",
+    appId:             "1:291177720355:web:09c7d64e89a46b48a85f96"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -2137,6 +2137,42 @@ async function init(){
   }
 }
 init();
+
+// ══ SERVICE WORKER + OFFLINE ══
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// Indicador de status online/offline
+function atualizarStatusOnline(){
+  const online = navigator.onLine;
+  let bar = document.getElementById('offline-bar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'offline-bar';
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99998;padding:8px 16px;font-family:Sora,sans-serif;font-size:12px;font-weight:600;text-align:center;transition:all .3s';
+    document.body.appendChild(bar);
+  }
+  if(!online){
+    bar.style.background = '#C0392B';
+    bar.style.color = '#fff';
+    bar.textContent = '📵 Sem conexão — trabalhando offline. Dados serão sincronizados quando reconectar.';
+    bar.style.display = 'block';
+    // ao ficar offline, salva no localStorage como backup
+    localStorage.setItem('gestorFiel_v3', JSON.stringify(D));
+  } else {
+    bar.style.background = '#27AE60';
+    bar.style.color = '#fff';
+    bar.textContent = '✅ Conexão restaurada — sincronizando...';
+    bar.style.display = 'block';
+    // ao reconectar, sobe dados locais para Firebase
+    if(window._fbSalvar) window._fbSalvar(JSON.parse(JSON.stringify(D)));
+    setTimeout(()=>{ bar.style.display='none'; }, 3000);
+  }
+}
+window.addEventListener('online',  atualizarStatusOnline);
+window.addEventListener('offline', atualizarStatusOnline);
+
 </script>
 </body>
 </html>
